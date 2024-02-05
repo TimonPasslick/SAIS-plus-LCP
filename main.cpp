@@ -163,11 +163,13 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 		for (I bucket {1}; bucket != alphabet_size; ++bucket)
 		{
 			const I end {bucket_bounds[bucket + 1]};
+			bool in_lms_area {false};
 			for (I i = end - inserted[bucket]; i != end; ++i)
 			{
 				const I text_start_index {suffix_array[i]};
-				if (text_start_index == 0 || text[text_start_index - 1] <= text[text_start_index])
+				if (!in_lms_area && (text_start_index == 0 || text[text_start_index - 1] <= text[text_start_index]))
 					continue; // normal S, not S*
+				in_lms_area = true;
 				I text_index {text_start_index};
 				bool is_l {false};
 				while (true)
