@@ -197,6 +197,8 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 			}
 		}
 	}
+	if (!recursion_required)
+		return suffix_array;
 	{ // remove gaps
 		I size {0};
 		for (const I rank : ranks)
@@ -206,10 +208,6 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 		ranks.resize(size);
 		allocated<I>(size); // n/2 in base call, so n total
 	}
-
-	if (!recursion_required)
-		return suffix_array;
-
 	const auto order = get_suffix_array(ranks, rank_max + 1);
 	std::fill(suffix_array.begin(), suffix_array.end(), empty);
 	std::fill(inserted.begin(), inserted.end(), 0);
