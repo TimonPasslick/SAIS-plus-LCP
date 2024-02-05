@@ -4,7 +4,10 @@ This is for a university assignment.
 
 ## How to build
 
-I put everything in main.cpp and use no external libraries, so it should be straightforward.
+I put everything in main.cpp and use no external libraries, so it should be straightforward, on Linux probably:
+```
+g++ -O3 -g main.cpp -o main
+```
 
 If you want to enable exact memory peak measurements for Linux, uncomment `#define LINUX_MEMORY_PEAK`. I didn't compile or test this code snippet because I'm on Windows.
 
