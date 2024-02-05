@@ -130,7 +130,7 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 	{ // put LMS-suffixes in text order at the end of buckets
 		auto previous_character = *text.rbegin();
 		bool previous_character_is_s {true};
-		for (I i(text.size() - 1); i >= 0; --i)
+		for (I i = text.size() - 1; i >= 0; --i)
 		{
 			const auto character = text[i];
 			const bool is_s {
@@ -297,7 +297,7 @@ const std::vector<I> get_lcp_array_phi(const std::vector<std::uint8_t>& t, const
 	lcp.reserve(sa.size());
 	for (I i{0}; i != sa.size(); ++i)
 		lcp.push_back(phi[sa[i]]);
-	return sa;
+	return lcp;
 }
 
 // copied and adapted Jan 27th from:
