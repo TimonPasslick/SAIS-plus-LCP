@@ -29,7 +29,7 @@ void print(const L& l)
 		if (i == -1)
 			std::cout << "   ";
 		else
-			std::cout << std::setw(2) << i + 1 << ' ';
+			std::cout << std::setw(2) << i << ' ';
 	std::cout << std::endl;
 }
 
