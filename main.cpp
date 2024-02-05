@@ -155,7 +155,7 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 	// ranks are 1 based so that the sentinel can be 0
 	std::vector<I> ranks(text.size(), 0); // gets shrinked to fit later on
 	bool recursion_required {false};
-		I rank_max {1};
+	I rank_max {1};
 	{ // insert ranks in text order with gaps
 		const I text_end(text.size() - 1);
 		ranks[text_end] = 1;
@@ -163,13 +163,11 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 		for (I bucket {1}; bucket != alphabet_size; ++bucket)
 		{
 			const I end {bucket_bounds[bucket + 1]};
-			bool in_lms_area {false};
 			for (I i = end - inserted[bucket]; i != end; ++i)
 			{
 				const I text_start_index {suffix_array[i]};
-				if (!in_lms_area && (text_start_index == 0 || text[text_start_index - 1] <= text[text_start_index]))
+				if (text_start_index == 0 || text[text_start_index - 1] <= text[text_start_index])
 					continue; // normal S, not S*
-				in_lms_area = true;
 				I text_index {text_start_index};
 				bool is_l {false};
 				while (true)
