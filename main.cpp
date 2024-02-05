@@ -74,8 +74,9 @@ void induce(std::vector<I>& suffix_array, std::vector<I>& inserted, const S& tex
 	std::vector<I> inserted_l(inserted.size(), 0);
 	allocated<I>(inserted.size()); // n/2 in first recursion, so n total
 	{ // scan left to right for L-type suffixes
-		for (const I entry : suffix_array)
+		for (I i {0}; i < suffix_array.size(); ++i)
 		{
+			const I entry {suffix_array[i]};
 			if (entry <= 0) // empty = -1 < 0
 				continue;
 			const auto candidate {text[entry - 1]};
