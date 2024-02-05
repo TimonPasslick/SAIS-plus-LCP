@@ -170,13 +170,11 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 					continue; // normal S, not S*
 				I text_index {text_start_index};
 				bool is_l {false};
-				bool new_rank {false};
 				while (true)
 				{ // find out if the LMS substrings are equal, if not, ++rank_max
 					const auto current_character = text[text_index];
 					if (text[previous_text_index] != current_character)
 					{
-						new_rank = true;
 						++rank_max;
 						break;
 					}
@@ -184,15 +182,16 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 					if (is_l)
 					{
 						if (previous_character > current_character)
+						{
+							recursion_required = true;
 							break; // end reached, LMS substrings equal
+						}
 					}
 					else if (previous_character < current_character)
 						is_l = true;
 					++previous_text_index;
 					++text_index;
 				}
-				if (!new_rank)
-					recursion_required = true;
 				ranks[text_start_index] = rank_max;
 				previous_text_index = text_start_index;
 			}
