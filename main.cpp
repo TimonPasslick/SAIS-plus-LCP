@@ -71,7 +71,8 @@ std::vector<I> bucket_boundaries(const S& text, const I alphabet_size)
 template <typename I, typename S>
 void induce(std::vector<I>& suffix_array, std::vector<I>& inserted, const S& text, const std::vector<I>& bucket_bounds)
 {
-	std::fill(inserted.begin(), inserted.end(), 0);
+	std::vector<I> inserted_l(inserted.size(), 0);
+	allocated<I>(inserted.size()); // n/2 in first recursion, so n total
 	{ // scan left to right for L-type suffixes
 		for (const I entry : suffix_array)
 		{
@@ -84,31 +85,29 @@ void induce(std::vector<I>& suffix_array, std::vector<I>& inserted, const S& tex
 			 */
 			if (candidate >= text[entry])
 				suffix_array[bucket_bounds[candidate]
-				             + inserted[candidate]++] = entry - 1;
+				             + inserted_l[candidate]++] = entry - 1;
 		}
 	}
 	std::fill(inserted.begin(), inserted.end(), 0);
 	{ // scan right to left for S-type suffixes
-		bool entry_is_s = true;
-		auto bucket = (typename S::value_type)(bucket_bounds.size() - 2);
-		const auto rend = suffix_array.rend();
-		for (auto it = suffix_array.rbegin(); it != rend; ++it)
+		typename S::value_type bucket = inserted.size() - 1;
+		for (I i = suffix_array.size() - 1; i >= 0; --i)
 		{
-			const auto one_based = rend - it;
-			if (one_based == bucket_bounds[bucket])
+			if (suffix_array[i] <= 0) // empty = -1 < 0
+				continue;
+			while (i < bucket_bounds[bucket])
 			{
 				--bucket;
-				entry_is_s = true;
 			}
-			if (one_based == bucket_bounds[bucket + 1] - inserted[bucket])
-				entry_is_s = false;
-			if (*it <= 0) // empty = -1 < 0
-				continue;
-			const I candidate {text[*it - 1]};
-			const auto right = text[*it];
-			if (candidate < right || (entry_is_s && candidate == right))
+			const I text_index {suffix_array[i]};
+			const I candidate {text[text_index - 1]};
+			const auto right = text[text_index];
+			if (candidate < right || (candidate == right &&
+			    /* text_index is S */ i >= bucket_bounds[bucket] + inserted_l[bucket]))
+			{
 				suffix_array[bucket_bounds[candidate + 1]
-				             - ++inserted[candidate]] = *it - 1;
+				             - ++inserted[candidate]] = text_index - 1;
+			}
 		}
 	}
 }
@@ -426,7 +425,7 @@ int main(int argc, char** argv)
 	memory_peak = get_memory_peak();
 #endif
 	// Print the factor to see how much larger the memory needed is than the text.
-	// Worst case for large texts: 6 * sizeof(std::intxx_t)
+	// Worst case for large texts: 7 * sizeof(std::intxx_t)
 	const auto factor = (double) memory_peak / text.size();
 	constexpr long long megabyte {2 << 20};
 	// rounded division
