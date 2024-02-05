@@ -114,7 +114,7 @@ void induce(std::vector<I>& suffix_array, std::vector<I>& inserted, const S& tex
 }
 // i needs to be int16_t, int32_t or int64_t
 template <typename I, typename S>
-std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 128)
+std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 {
 	constexpr I empty {-1};
 
@@ -226,7 +226,7 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 128)
 }
 
 template <typename I>
-const std::vector<I> get_lcp_array_naive(const std::string& text, const std::vector<I>& suffix_array)
+const std::vector<I> get_lcp_array_naive(const std::vector<std::uint8_t>& text, const std::vector<I>& suffix_array)
 {
 	std::vector<I> lcp_array;
 	lcp_array.reserve(suffix_array.size());
@@ -255,7 +255,7 @@ const std::vector<I> get_isa(const std::vector<I>& sa)
 	return isa;
 }
 template <typename I>
-const std::vector<I> get_lcp_array_kasai(const std::string& t, const std::vector<I>& sa)
+const std::vector<I> get_lcp_array_kasai(const std::vector<std::uint8_t>& t, const std::vector<I>& sa)
 {
 	const auto isa = get_isa(sa);
 	std::vector<I> lcp(sa.size(), 0);
@@ -276,7 +276,7 @@ const std::vector<I> get_lcp_array_kasai(const std::string& t, const std::vector
 }
 
 template <typename I>
-const std::vector<I> get_lcp_array_phi(const std::string& t, const std::vector<I>& sa)
+const std::vector<I> get_lcp_array_phi(const std::vector<std::uint8_t>& t, const std::vector<I>& sa)
 {
 	std::vector<I> phi(sa.size());
 	const I n = sa.size() - 1;
@@ -303,7 +303,7 @@ const std::vector<I> get_lcp_array_phi(const std::string& t, const std::vector<I
 
 // copied and adapted Jan 27th from:
 // https://insanecoding.blogspot.com/2011/11/how-to-read-in-file-in-c.html
-std::string get_file_contents(const char *filename)
+std::vector<std::uint8_t> get_file_contents(const char *filename)
 {
 	std::ifstream in {filename, std::ios::in | std::ios::binary};
 	if (!in)
@@ -313,24 +313,13 @@ std::string get_file_contents(const char *filename)
 	}
 	in.seekg(0, std::ios::end);
 	std::size_t length {static_cast<std::size_t>(in.tellg())};
-	std::string contents;
+	std::vector<std::uint8_t> contents;
 	contents.reserve(length + 1); // +1 for sentinel
 	contents.resize(length);
 	in.seekg(0, std::ios::beg);
-	in.read(&contents[0], contents.size());
+	in.read(reinterpret_cast<char*>(&contents[0]), contents.size());
 	in.close();
-
-	for (const char character : contents)
-	{
-		// I don't want to deal with signed chars.
-		if (character < 0 || character > 127)
-		{
-			std::cerr << "Only ASCII characters are supported." << std::endl;
-			std::exit(1);
-		}
-	}
-
-	contents.push_back('\0'); // sentinel required for SA and LCP array construction
+	contents.push_back(0); // sentinel required for SA and LCP array construction
 	return contents;
 }
 
@@ -364,7 +353,7 @@ void run(std::int64_t& sa_construction_time,
          std::int64_t& lcp_naive_construction_time,
          std::int64_t& lcp_kasai_construction_time,
          std::int64_t& lcp_phi_construction_time,
-		 const std::string& text)
+		 const std::vector<std::uint8_t>& text)
 {
 	std::vector<I> suffix_array;
 	sa_construction_time = get_execution_time([&]() {
@@ -382,11 +371,11 @@ void run(std::int64_t& sa_construction_time,
 }
 int main(int argc, char** argv)
 {
-	std::string text;
+	std::vector<std::uint8_t> text;
 	switch (argc)
 	{
 	case 1:
-		text = "mississippi\0";
+		text = {'m', 'i', 's', 's', 'i', 's', 's', 'i', 'p', 'p', 'i', 0};
 		break;
 	case 2:
 		text = get_file_contents(argv[1]);
@@ -434,7 +423,7 @@ int main(int argc, char** argv)
 #endif
 	// Print the factor to see how much larger the memory needed is than the text.
 	// Worst case for large texts: 6 * sizeof(std::intxx_t)
-	const auto factor = (double) memory_peak / text.length();
+	const auto factor = (double) memory_peak / text.size();
 	constexpr long long megabyte {2 << 20};
 	// rounded division
 	memory_peak = (memory_peak + megabyte / 2) / megabyte;
