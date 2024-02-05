@@ -180,16 +180,16 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 						++rank_max;
 						break;
 					}
-					const auto previous_character = text[text_index - 1];
+					const auto next_character = text[text_index + 1];
 					if (is_l)
 					{
-						if (previous_character > current_character)
-						{
+						if (current_character < next_character)
+						{ // arrived at last S*, LMS substrings equal
 							recursion_required = true;
-							break; // end reached, LMS substrings equal
+							break;
 						}
 					}
-					else if (previous_character < current_character)
+					else if (current_character > next_character)
 						is_l = true;
 					++previous_text_index;
 					++text_index;
