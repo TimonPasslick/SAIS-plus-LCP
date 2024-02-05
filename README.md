@@ -1,6 +1,6 @@
 # SAIS-plus-LCP
 
-This is for a university assignment.
+This is for a university assignment. Constructs suffix arrays with the SAIS algorithm and LCP arrays with the naive, Kasai and Phi algorithms.
 
 ## How to build
 
