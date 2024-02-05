@@ -100,7 +100,7 @@ void induce(std::vector<I>& suffix_array, std::vector<I>& inserted, const S& tex
 				--bucket;
 				entry_is_s = true;
 			}
-			else if (one_based == bucket_bounds[bucket + 1] - inserted[bucket])
+			if (one_based == bucket_bounds[bucket + 1] - inserted[bucket])
 				entry_is_s = false;
 			if (*it <= 0) // empty = -1 < 0
 				continue;
