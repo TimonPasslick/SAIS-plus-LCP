@@ -49,7 +49,7 @@ template <typename I, typename S>
 std::vector<I> bucket_boundaries(const S& text, const I alphabet_size)
 {
 	std::vector<I> result(alphabet_size + 1, 0);
-	allocated<I>(alphabet_size + 1);
+	allocated<I>(alphabet_size + 1); // n/2 in first recursion, so n total
 
 	// histogram
 	for (const auto character : text)
@@ -119,14 +119,14 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 128)
 	constexpr I empty {-1};
 
 	std::vector<I> suffix_array(text.size(), empty);
-	allocated<I>(text.size());
+	allocated<I>(text.size()); // n in base call, so 2n total
 	const auto bucket_bounds = bucket_boundaries<I>(text, alphabet_size);
 	std::vector<I> inserted(alphabet_size, 0);
-	allocated<I>(alphabet_size);
+	allocated<I>(alphabet_size); // n/2 in first recursion, so n total
 
 	std::vector<I> lms;
 	lms.reserve(text.size() / 2); // max amount
-	allocated<I>(text.size() / 2);
+	allocated<I>(text.size() / 2); // n/2 in base call, so n total
 	{ // put LMS-suffixes in text order at the end of buckets
 		auto previous_character = *text.rbegin();
 		bool previous_character_is_s {true};
@@ -153,8 +153,7 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 128)
 
 	// compute T': LMS substring ranks in text order
 	// ranks are 1 based so that the sentinel can be 0
-	std::vector<I> ranks(text.size(), 0);
-	allocated<I>(text.size());
+	std::vector<I> ranks(text.size(), 0); // gets shrinked to fit later on
 	bool recursion_required {false};
 		I rank_max {1};
 	{ // insert ranks in text order with gaps
@@ -206,6 +205,7 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 128)
 				ranks[size++] = rank;
 		ranks[size++] = 0; // sentinel
 		ranks.resize(size);
+		allocated<I>(size); // n/2 in base call, so n total
 	}
 
 	if (!recursion_required)
@@ -433,7 +433,7 @@ int main(int argc, char** argv)
 	memory_peak = get_memory_peak();
 #endif
 	// Print the factor to see how much larger the memory needed is than the text.
-	// Worst case for large texts: 14 * sizeof(std::intxx_t)
+	// Worst case for large texts: 6 * sizeof(std::intxx_t)
 	const auto factor = (double) memory_peak / text.length();
 	constexpr long long megabyte {2 << 20};
 	// rounded division
