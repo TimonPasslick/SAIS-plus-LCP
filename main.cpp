@@ -319,6 +319,11 @@ std::vector<std::uint8_t> get_file_contents(const char *filename)
 	in.seekg(0, std::ios::beg);
 	in.read(reinterpret_cast<char*>(&contents[0]), contents.size());
 	in.close();
+	if (std::find(contents.begin(), contents.end(), 0) != contents.end())
+	{
+		std::cerr << "Null characters not supported." << std::endl;
+		std::exit(1);
+	}
 	contents.push_back(0); // sentinel required for SA and LCP array construction
 	return contents;
 }
