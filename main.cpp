@@ -204,25 +204,50 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 		}
 	}
 	if (!recursion_required)
-		return suffix_array;
-	{ // remove gaps
-		I size {0};
-		for (const I rank : ranks)
-			if (rank != 0)
-				ranks[size++] = rank;
-		ranks[size++] = 0; // sentinel
-		ranks.resize(size);
-		allocated<I>(size); // n/2 in base call, so n total
-	}
-	const auto order = get_suffix_array(ranks, rank_max + 1);
-	std::fill(suffix_array.begin(), suffix_array.end(), empty);
-	std::fill(inserted.begin(), inserted.end(), 0);
-	for (auto it {order.crbegin()}; it < order.crend() - 1; ++it)
 	{
-		const I text_index {*(lms.rbegin() + *it)};
-		const I character {text[text_index]};
-		suffix_array[bucket_bounds[character + 1]
-		             - ++inserted[character]] = text_index;
+		for (I bucket {0}; bucket < inserted.size(); ++bucket)
+		{
+			const I l_start {bucket_bounds[bucket]};
+			const I s_end {bucket_bounds[bucket + 1]};
+			const I l_end = s_end - inserted[bucket];
+			std::fill(suffix_array.begin() + l_start, suffix_array.begin() + l_end, empty);
+			I lms_count {0};
+			for (I i = s_end - 1; i >= l_end; --i)
+			{
+				I& entry {suffix_array[i]};
+				if (entry <= 0 || text[entry - 1] <= text[entry])
+					entry = empty; // normal S
+				else
+				{ // S*
+					const I copy {entry};
+					entry = empty;
+					suffix_array[s_end - ++lms_count] = copy;
+				}
+			}
+		}
+		suffix_array[0] = text.size() - 1;
+	}
+	else
+	{
+		{ // remove gaps
+			I size {0};
+			for (const I rank : ranks)
+				if (rank != 0)
+					ranks[size++] = rank;
+			ranks[size++] = 0; // sentinel
+			ranks.resize(size);
+			allocated<I>(size); // n/2 in base call, so n total
+		}
+		const auto order = get_suffix_array(ranks, rank_max + 1);
+		std::fill(suffix_array.begin(), suffix_array.end(), empty);
+		std::fill(inserted.begin(), inserted.end(), 0);
+		for (auto it {order.crbegin()}; it < order.crend() - 1; ++it)
+		{
+			const I text_index {*(lms.rbegin() + *it)};
+			const I character {text[text_index]};
+			suffix_array[bucket_bounds[character + 1]
+						 - ++inserted[character]] = text_index;
+		}
 	}
 	induce(suffix_array, inserted, text, bucket_bounds);
 	return suffix_array;
