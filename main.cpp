@@ -71,6 +71,7 @@ std::vector<I> bucket_boundaries(const S& text, const I alphabet_size)
 template <typename I, typename S>
 void induce(std::vector<I>& suffix_array, std::vector<I>& inserted, const S& text, const std::vector<I>& bucket_bounds)
 {
+	print(suffix_array);
 	std::vector<I> inserted_l(inserted.size(), 0);
 	allocated<I>(inserted.size()); // n/2 in first recursion, so n total
 	{ // scan left to right for L-type suffixes
@@ -85,8 +86,11 @@ void induce(std::vector<I>& suffix_array, std::vector<I>& inserted, const S& tex
 			 *     entry can't be S, but not S* (not inserted yet)
 			 */
 			if (candidate >= text[entry])
+			{
 				suffix_array[bucket_bounds[candidate]
 				             + inserted_l[candidate]++] = entry - 1;
+				print(suffix_array);
+			}
 		}
 	}
 	std::fill(inserted.begin(), inserted.end(), 0);
@@ -108,6 +112,7 @@ void induce(std::vector<I>& suffix_array, std::vector<I>& inserted, const S& tex
 			{
 				suffix_array[bucket_bounds[candidate + 1]
 				             - ++inserted[candidate]] = text_index - 1;
+				print(suffix_array);
 			}
 		}
 	}
@@ -237,6 +242,13 @@ const std::vector<I> get_lcp_array_naive(const std::vector<std::uint8_t>& text, 
 		{
 			++i;
 			++j;
+		}
+		if (text[i] > text[j])
+		{
+			const I difference = i - i_start;
+			i -= difference;
+			j -= difference;
+			std::cerr << "order violated! " << i << ":" << text[i] << " > " << j << ":" << text[j] << ", SA index: " << it - suffix_array.begin() << std::endl;
 		}
 		lcp_array.push_back(i - i_start);
 	}
