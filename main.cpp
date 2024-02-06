@@ -98,17 +98,18 @@ void induce(std::vector<I>& suffix_array, std::vector<I>& inserted, const S& tex
 		typename S::value_type bucket = inserted.size() - 1;
 		for (I i = suffix_array.size() - 1; i >= 0; --i)
 		{
-			if (suffix_array[i] <= 0) // empty = -1 < 0
+			const I entry {suffix_array[i]};
+			if (entry <= 0) // empty = -1 < 0
 				continue;
 			while (i < bucket_bounds[bucket])
 			{
 				--bucket;
 			}
 			const I text_index {suffix_array[i]};
-			const I candidate {text[text_index - 1]};
-			const auto right = text[text_index];
+			const I candidate {text[entry - 1]};
+			const auto right = text[entry];
 			if (candidate < right || (candidate == right &&
-			    /* text_index is S */ i >= bucket_bounds[bucket] + inserted_l[bucket]))
+			    /* entry is S */ i >= bucket_bounds[bucket] + inserted_l[bucket]))
 			{
 				suffix_array[bucket_bounds[candidate + 1]
 				             - ++inserted[candidate]] = text_index - 1;
