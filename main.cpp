@@ -418,9 +418,11 @@ void run(std::int64_t& sa_construction_time,
 	sa_construction_time = get_execution_time([&]() {
 		suffix_array = get_suffix_array<I>(text);
 	});
-	lcp_naive_construction_time = get_execution_time([&]() {
-		get_lcp_array_naive<I>(text, suffix_array);
-	});
+	constexpr bool run_lcp_naive {true};
+	if constexpr (run_lcp_naive)
+		lcp_naive_construction_time = get_execution_time([&]() {
+			get_lcp_array_naive<I>(text, suffix_array);
+		});
 	lcp_kasai_construction_time = get_execution_time([&]() {
 		get_lcp_array_kasai<I>(text, suffix_array);
 	});
