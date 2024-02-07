@@ -283,16 +283,20 @@ const std::vector<I> get_lcp_array_naive(const std::vector<std::uint8_t>& text, 
 			++i;
 			++j;
 		}
-		if (text[i] > text[j])
+		constexpr bool check_for_correctness {false};
+		if constexpr (check_for_correctness)
 		{
-			const I difference = i - i_start;
-			i -= difference;
-			j -= difference;
-			std::cerr << "order violated! "
-			          << i << ":" << text[i] << " > " << j << ":" << text[j]
-					  << ", SA index: " << it - suffix_array.begin()
-					  << ", distance: " << difference
-					  << std::endl;
+			if (text[i] > text[j])
+			{
+				const I difference = i - i_start;
+				i -= difference;
+				j -= difference;
+				std::cerr << "order violated! "
+						<< i << ":" << text[i] << " > " << j << ":" << text[j]
+						<< ", SA index: " << it - suffix_array.begin()
+						<< ", distance: " << difference
+						<< std::endl;
+			}
 		}
 		lcp_array.push_back(i - i_start);
 	}
