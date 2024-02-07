@@ -433,17 +433,29 @@ void run(std::int64_t& sa_construction_time,
 int main(int argc, char** argv)
 {
 	std::vector<std::uint8_t> text;
+	long long power {-1};
 	switch (argc)
 	{
 	case 1:
 		text = {'m', 'i', 's', 's', 'i', 's', 's', 'i', 'p', 'p', 'i', 0};
 		break;
+	case 3:
+		{
+			char* end;
+			power = std::strtoll(argv[2], &end, 10);
+		}
+		// fall through
 	case 2:
 		text = get_file_contents(argv[1]);
 		break;
 	default:
 		std::cerr << "too many arguments, only input file expected" << std::endl;
 		return 1;
+	}
+	if (power >= 0)
+	{
+		text.resize(1 << power);
+		*text.rbegin() = 0;
 	}
 	std::int64_t sa_construction_time;
 	std::int64_t lcp_naive_construction_time;
