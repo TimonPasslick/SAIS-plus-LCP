@@ -71,7 +71,6 @@ std::vector<I> bucket_boundaries(const S& text, const I alphabet_size)
 template <typename I, typename S>
 void induce(std::vector<I>& suffix_array, std::vector<I>& inserted, const S& text, const std::vector<I>& bucket_bounds)
 {
-	print(suffix_array);
 	std::vector<I> inserted_l(inserted.size(), 0);
 	allocated<I>(inserted.size()); // n/2 in first recursion, so n total
 	{ // scan left to right for L-type suffixes
@@ -86,11 +85,8 @@ void induce(std::vector<I>& suffix_array, std::vector<I>& inserted, const S& tex
 			 *     entry can't be S, but not S* (not inserted yet)
 			 */
 			if (candidate >= text[entry])
-			{
 				suffix_array[bucket_bounds[candidate]
 				             + inserted_l[candidate]++] = entry - 1;
-				print(suffix_array);
-			}
 		}
 	}
 	std::fill(inserted.begin(), inserted.end(), 0);
@@ -113,7 +109,6 @@ void induce(std::vector<I>& suffix_array, std::vector<I>& inserted, const S& tex
 			{
 				suffix_array[bucket_bounds[candidate + 1]
 				             - ++inserted[candidate]] = text_index - 1;
-				print(suffix_array);
 			}
 		}
 	}
@@ -176,21 +171,40 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 					continue; // normal S, not S*
 				I text_index {text_start_index};
 				bool is_l {false};
+				bool equal_range {false};
+				bool equal_range_mismatch {false};
 				while (true)
 				{ // find out if the LMS substrings are equal, if not, ++rank_max
 					const auto current_character = text[text_index];
 					if (text[previous_text_index] != current_character)
 					{
-						++rank_max;
-						break;
+						if (equal_range)
+							equal_range_mismatch = true;
+						else
+						{
+							++rank_max;
+							break;
+						}
 					}
 					const auto next_character = text[text_index + 1];
 					if (is_l)
 					{
 						if (current_character < next_character)
-						{ // arrived at last S*, LMS substrings equal
+						{ // scanned last S*, maybe additional S
 							recursion_required = true;
 							break;
+						}
+						else if (current_character == next_character)
+							equal_range = true;
+						else
+						{
+							if (equal_range_mismatch)
+							{
+								++rank_max;
+								break;
+							}
+							equal_range = false;
+							equal_range_mismatch = false;
 						}
 					}
 					else if (current_character > next_character)
@@ -274,7 +288,11 @@ const std::vector<I> get_lcp_array_naive(const std::vector<std::uint8_t>& text, 
 			const I difference = i - i_start;
 			i -= difference;
 			j -= difference;
-			std::cerr << "order violated! " << i << ":" << text[i] << " > " << j << ":" << text[j] << ", SA index: " << it - suffix_array.begin() << std::endl;
+			std::cerr << "order violated! "
+			          << i << ":" << text[i] << " > " << j << ":" << text[j]
+					  << ", SA index: " << it - suffix_array.begin()
+					  << ", distance: " << difference
+					  << std::endl;
 		}
 		lcp_array.push_back(i - i_start);
 	}
