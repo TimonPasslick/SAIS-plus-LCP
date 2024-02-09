@@ -520,7 +520,7 @@ int main(int argc, char** argv)
 	// Print the factor to see how much larger the memory needed is than the text.
 	// Worst case for large texts: 7 * sizeof(std::intxx_t)
 	const auto factor = (double) memory_peak / text.size();
-	constexpr long long megabyte {2 << 20};
+	constexpr long long megabyte {1 << 20};
 	std::cout << "RESULT name=TimonPasslick"
 		<< " sa_construction_time=" << sa_construction_time
 #ifdef PRINT_FLOAT
