@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cerrno>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
@@ -454,8 +455,18 @@ int main(int argc, char** argv)
 	}
 	if (power >= 0)
 	{
-		text.resize(1 << power);
-		*text.rbegin() = 0;
+		const size_t new_size (1 << power);
+		if (new_size < text.size())
+		{
+			text.resize(new_size);
+			*text.rbegin() = 0;
+		}
+		else
+		{
+			const auto text_power = std::log2(text.size());
+			std::cerr << "text too small, log difference: " << power - text_power << std::endl;
+			return 1;
+		}
 	}
 	std::int64_t sa_construction_time;
 	std::int64_t lcp_naive_construction_time;
