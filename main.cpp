@@ -1,3 +1,10 @@
+// I have a Windows laptop and the std library doesn't provide peak memory usage.
+// #define LINUX_MEMORY_PEAK
+// #define PRINT_FLOAT
+constexpr bool estimate_memory_peak {true};
+constexpr bool check_for_correctness {false};
+constexpr bool run_lcp_naive {true};
+
 #include <algorithm>
 #include <cerrno>
 #include <chrono>
@@ -13,16 +20,11 @@
 #include <utility>
 #include <vector>
 
-// I have a Windows laptop and the std library doesn't provide peak memory usage.
-// #define LINUX_MEMORY_PEAK
-
 #ifdef LINUX_MEMORY_PEAK
 #include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #endif
-
-// #define PRINT_FLOAT
 
 template <typename L>
 void print(const L& l)
@@ -36,7 +38,6 @@ void print(const L& l)
 	std::cout << std::endl;
 }
 
-constexpr bool estimate_memory_peak {true};
 long long memory_peak {0};
 template <typename T, typename Int>
 inline void allocated(const Int amount)
@@ -286,7 +287,6 @@ const std::vector<I> get_lcp_array_naive(const std::vector<std::uint8_t>& text, 
 			++i;
 			++j;
 		}
-		constexpr bool check_for_correctness {false};
 		if constexpr (check_for_correctness)
 		{
 			if (text[i] > text[j])
@@ -432,7 +432,6 @@ void run(Time& sa_construction_time,
 	sa_construction_time = get_execution_time([&]() {
 		suffix_array = get_suffix_array<I>(text);
 	});
-	constexpr bool run_lcp_naive {true};
 	if constexpr (run_lcp_naive)
 		lcp_naive_construction_time = get_execution_time([&]() {
 			get_lcp_array_naive<I>(text, suffix_array);
