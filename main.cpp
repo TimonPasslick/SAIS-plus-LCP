@@ -336,6 +336,12 @@ const std::vector<I> get_lcp_array_kasai(const std::vector<std::uint8_t>& t, con
 template <typename I>
 const std::vector<I> get_lcp_array_phi(const std::vector<std::uint8_t>& t, const std::vector<I>& sa)
 {
+	if (t.size() == 1)
+	{
+		std::vector<I> lcp;
+		lcp.push_back(0);
+		return lcp;
+	}
 	std::vector<I> phi(sa.size());
 	const I n = sa.size() - 1;
 	phi[n] = sa[n];
