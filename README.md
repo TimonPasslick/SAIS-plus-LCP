@@ -16,3 +16,5 @@ If you want to enable estimated, but platform independent memory peak measuremen
 If you want to check for correctness with the naive LCP algorithm, set `check_for_correctness` to true.
 
 If you want to restrict the text size to a power of 2, provide it as a second argument.
+
+If you want to print floating point numbers, uncomment `#define PRINT_FLOAT`.

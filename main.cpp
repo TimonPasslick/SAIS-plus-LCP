@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #endif
 
+// #define PRINT_FLOAT
+
 template <typename L>
 void print(const L& l)
 {
@@ -389,12 +391,17 @@ std::vector<std::uint8_t> get_file_contents(const char *filename)
 	return contents;
 }
 
-std::int64_t get_execution_time(const std::function<void()>& function)
+#ifdef PRINT_FLOAT
+using Time = double;
+#else
+using Time = std::int64_t;
+#endif
+Time get_execution_time(const std::function<void()>& function)
 {
 	using namespace std::chrono;
 	const auto before = high_resolution_clock::now();
 	function();
-	return duration_cast<milliseconds>(high_resolution_clock::now() - before).count();
+	return duration_cast<duration<Time, std::milli>>(high_resolution_clock::now() - before).count();
 }
 
 #ifdef LINUX_MEMORY_PEAK
@@ -415,10 +422,10 @@ long long get_memory_peak()
 #endif
 
 template <typename I>
-void run(std::int64_t& sa_construction_time,
-         std::int64_t& lcp_naive_construction_time,
-         std::int64_t& lcp_kasai_construction_time,
-         std::int64_t& lcp_phi_construction_time,
+void run(Time& sa_construction_time,
+         Time& lcp_naive_construction_time,
+         Time& lcp_kasai_construction_time,
+         Time& lcp_phi_construction_time,
 		 const std::vector<std::uint8_t>& text)
 {
 	std::vector<I> suffix_array;
@@ -474,10 +481,10 @@ int main(int argc, char** argv)
 			return 1;
 		}
 	}
-	std::int64_t sa_construction_time;
-	std::int64_t lcp_naive_construction_time;
-	std::int64_t lcp_kasai_construction_time;
-	std::int64_t lcp_phi_construction_time;
+	Time sa_construction_time;
+	Time lcp_naive_construction_time;
+	Time lcp_kasai_construction_time;
+	Time lcp_phi_construction_time;
 	if (text.size() <= std::numeric_limits<std::int16_t>::max())
 	{
 		run<std::int16_t>(
@@ -515,11 +522,14 @@ int main(int argc, char** argv)
 	// Worst case for large texts: 7 * sizeof(std::intxx_t)
 	const auto factor = (double) memory_peak / text.size();
 	constexpr long long megabyte {2 << 20};
-	// rounded division
-	memory_peak = (memory_peak + megabyte / 2) / megabyte;
 	std::cout << "RESULT name=TimonPasslick"
 		<< " sa_construction_time=" << sa_construction_time
-		<< " sa_construction_memory=" << memory_peak
+#ifdef PRINT_FLOAT
+		<< " sa_construction_memory=" << memory_peak / (double) megabyte
+#else
+		// rounded division
+		<< " sa_construction_memory=" << (memory_peak + megabyte / 2) / megabyte
+#endif
 		<< " lcp_naive_construction_time=" << lcp_naive_construction_time
 		<< " lcp_kasai_construction_time=" << lcp_kasai_construction_time
 		<< " lcp_phi_construction_time=" << lcp_phi_construction_time
