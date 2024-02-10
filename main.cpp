@@ -38,13 +38,16 @@ void print(const L& l)
 	std::cout << std::endl;
 }
 
+long long memory {0};
 long long memory_peak {0};
 template <typename T, typename Int>
 inline void allocated(const Int amount)
 {
 	if constexpr (estimate_memory_peak)
 	{
-		memory_peak += (long long) (sizeof(T) * amount);
+		memory += (long long) (sizeof(T) * amount);
+		if (memory > memory_peak)
+			memory_peak = memory;
 	}
 }
 
@@ -153,12 +156,16 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 			previous_character_is_s = is_s;
 		}
 	}
+	allocated<I>(-(int)lms.size());
+	lms.shrink_to_fit();
+	allocated<I>(lms.size());
 
 	induce(suffix_array, inserted, text, bucket_bounds);
 
 	// compute T': LMS substring ranks in text order
 	// ranks are 1 based so that the sentinel can be 0
-	std::vector<I> ranks(text.size(), 0); // gets shrinked to fit later on
+	std::vector<I> ranks(text.size(), 0);
+	allocated<I>(text.size());
 	bool recursion_required {false};
 	I rank_max {1};
 	{ // insert ranks in text order with gaps
@@ -253,6 +260,7 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 				if (rank != 0)
 					ranks[size++] = rank;
 			ranks[size++] = 0; // sentinel
+			allocated<I>(-(int)ranks.size());
 			ranks.resize(size);
 			allocated<I>(size); // n/2 in base call, so n total
 		}
