@@ -264,7 +264,7 @@ std::vector<I> get_suffix_array(const S& text, const I alphabet_size = 256)
 			ranks.resize(size);
 			allocated<I>(size); // n/2 in base call, so n total
 		}
-		const auto order = get_suffix_array(ranks, rank_max + 1);
+		const auto order = get_suffix_array<I>(ranks, rank_max + 1);
 		std::fill(suffix_array.begin(), suffix_array.end(), empty);
 		std::fill(inserted.begin(), inserted.end(), 0);
 		for (auto it {order.crbegin()}; it < order.crend() - 1; ++it)
